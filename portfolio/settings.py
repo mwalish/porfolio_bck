@@ -124,25 +124,48 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 12,
 }
 
+# ============================================================
 # CORS Settings
+# ============================================================
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:5173/mwalish-2026',
-    'http://127.0.0.1:5173/mwalish-2026',
-    'https://pirate.alwaysdata.net',
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://pirate.alwaysdata.net",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # Open only in development
 
+# Only allow all origins when running in development
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+# ============================================================
 # CSRF Settings
+# ============================================================
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'https://pirate.alwaysdata.net',
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://pirate.alwaysdata.net",
 ]
 
 # Security — auto-applied in production only
