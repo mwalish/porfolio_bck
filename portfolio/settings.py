@@ -140,8 +140,8 @@ CORS_ALLOW_ALL_ORIGINS = DEBUG  # Open only in development
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'http://localhost:5173/mwalish-2026',
-    'http://127.0.0.1:5173/mwalish-2026',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
     'https://pirate.alwaysdata.net',
 ]
 
