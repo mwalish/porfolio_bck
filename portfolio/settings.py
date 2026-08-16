@@ -78,7 +78,7 @@ DATABASES = {
         'NAME': 'pirate_portfolio',
         'USER': 'pirate',
         'PASSWORD': 'mwalish2026',
-        'HOST': 'pirate.alwaysdata.net',
+        'HOST': 'mysql-pirate.alwaysdata.net',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
