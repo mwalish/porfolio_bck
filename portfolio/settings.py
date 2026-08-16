@@ -11,13 +11,13 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ⚠️ UPDATE THIS WITH A REAL SECRET KEY IN PRODUCTION
+# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-(your-secret-key-here-change-in-production)')
 
-# ✅ AUTO SWITCH: Debug ON locally, OFF in production
+# AUTO SWITCH: Debug ON locally, OFF in production
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-# ✅ ALL hosts — local + production
+# All allowed hosts
 ALLOWED_HOSTS = [
     'pirate.alwaysdata.net',
     'localhost',
@@ -38,7 +38,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # ✅ Keep FIRST
+    'corsheaders.middleware.CorsMiddleware',  # MUST be first
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -68,7 +68,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'portfolio.wsgi.application'
 
-# ✅ AUTO SWITCH DATABASE: SQLite local / MySQL production
+# AUTO SWITCH DATABASE: SQLite locally / MySQL on alwaysdata
 if DEBUG:
     DATABASES = {
         'default': {
@@ -111,6 +111,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Django REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
@@ -123,18 +124,33 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 12,
 }
 
-# ✅ CORS — local dev + production frontend
+# CORS Settings
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'http://localhost:5173/mwalish-2026',
+    'http://127.0.0.1:5173/mwalish-2026',
     'https://pirate.alwaysdata.net',
 ]
 
-# ✅ CSRF — allow your frontend
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = DEBUG  # Open only in development
+
+# CSRF Settings
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'http://localhost:5173/mwalish-2026',
+    'http://127.0.0.1:5173/mwalish-2026',
     'https://pirate.alwaysdata.net',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # ✅ ON only locally
+# Security — auto-applied in production only
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
