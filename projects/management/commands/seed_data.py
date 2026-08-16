@@ -1,13 +1,13 @@
 from django.core.management.base import BaseCommand
-from projects.models import Project, Profile
+from projects.models import Project, PersonalInfo
 
 
 class Command(BaseCommand):
-    help = 'Seed the database with sample projects and profile'
+    help = 'Seed the database with sample projects and personal info'
 
     def handle(self, *args, **options):
-        # Seed profile (single record)
-        profile, created = Profile.objects.get_or_create(pk=1)
+        # Seed personal info (single record)
+        profile, created = PersonalInfo.objects.get_or_create(pk=1)
         profile.name = 'Mwalish'
         profile.title = 'Software Engineering Student & Developer'
         profile.bio = (
