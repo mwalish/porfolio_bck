@@ -82,7 +82,9 @@ else:
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'pirate_portfolio',
             'USER': 'pirate',
-            'PASSWORD': 'mwalish2026',
+            # Rotate this password in the Alwaysdata panel, then set the new
+            # one as an env var there — never commit it to the repo again.
+            'PASSWORD': os.getenv('DJANGO_DB_PASSWORD'),
             'HOST': 'mysql-pirate.alwaysdata.net',
             'PORT': '3306',
             'OPTIONS': {
