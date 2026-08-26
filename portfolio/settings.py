@@ -134,8 +134,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://pirate.alwaysdata.net",
+    "https://myportfolio-rho-six-12.vercel.app",  # ✅ ADD THIS
 ]
-
 CORS_ALLOW_CREDENTIALS = True
 
 # Only allow all origins when running in development
@@ -169,6 +169,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://pirate.alwaysdata.net",
+    "https://myportfolio-rho-six-12.vercel.app",  # ✅ ALREADY THERE — good
 ]
 
 # Security — auto-applied in production only
