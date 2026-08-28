@@ -1,7 +1,10 @@
 from rest_framework import viewsets, permissions, generics
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Project, PersonalInfo, CodeSnippet
-from .serializers import ProjectSerializer, PersonalInfoSerializer, CodeSnippetSerializer
+from .models import Project, PersonalInfo, CodeSnippet, Skill, Experience, Testimonial, ContactMessage
+from .serializers import (
+    ProjectSerializer, PersonalInfoSerializer, CodeSnippetSerializer,
+    SkillSerializer, ExperienceSerializer, TestimonialSerializer, ContactMessageSerializer,
+)
 
 
 class PersonalInfoView(generics.RetrieveUpdateAPIView):
@@ -48,3 +51,32 @@ class CodeSnippetViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
+
+
+class SkillListView(generics.ListAPIView):
+    """Public read-only list of skills, managed via Django admin."""
+    queryset = Skill.objects.all()
+    serializer_class = SkillSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class ExperienceListView(generics.ListAPIView):
+    """Public read-only timeline of education/work entries, managed via Django admin."""
+    queryset = Experience.objects.all()
+    serializer_class = ExperienceSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class TestimonialListView(generics.ListAPIView):
+    """Public read-only list of testimonials, managed via Django admin."""
+    queryset = Testimonial.objects.all()
+    serializer_class = TestimonialSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class ContactMessageCreateView(generics.CreateAPIView):
+    """Public endpoint the contact form POSTs to. No read access — messages
+    are only viewable via Django admin, never exposed over the API."""
+    queryset = ContactMessage.objects.all()
+    serializer_class = ContactMessageSerializer
+    permission_classes = [permissions.AllowAny]

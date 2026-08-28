@@ -1,21 +1,51 @@
 from rest_framework import serializers
-from .models import Project, PersonalInfo, CodeSnippet
+from .models import Project, PersonalInfo, CodeSnippet, Skill, Experience, Testimonial, ContactMessage
 
 
 class PersonalInfoSerializer(serializers.ModelSerializer):
     skill_list = serializers.SerializerMethodField()
     profile_image = serializers.ImageField(required=False, allow_null=True)
+    resume = serializers.FileField(required=False, allow_null=True)
 
     class Meta:
         model = PersonalInfo
         fields = [
             'id', 'name', 'title', 'bio', 'location', 'avatar', 'profile_image',
             'github', 'linkedin', 'twitter', 'email', 'skills',
-            'skill_list', 'updated_at',
+            'skill_list', 'resume', 'updated_at',
         ]
 
     def get_skill_list(self, obj):
         return obj.skill_list()
+
+
+class SkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = ['id', 'name', 'percentage', 'category', 'order']
+
+
+class ExperienceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Experience
+        fields = [
+            'id', 'title', 'organization', 'type', 'description',
+            'start_date', 'end_date', 'order',
+        ]
+
+
+class TestimonialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Testimonial
+        fields = ['id', 'name', 'role', 'message', 'avatar', 'order', 'created']
+        read_only_fields = ['created']
+
+
+class ContactMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = ['id', 'name', 'email', 'subject', 'message', 'created']
+        read_only_fields = ['id', 'created']
 
 
 class CodeSnippetSerializer(serializers.ModelSerializer):

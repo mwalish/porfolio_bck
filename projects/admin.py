@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Project, PersonalInfo, CodeSnippet
+from .models import (
+    Project, PersonalInfo, CodeSnippet, Skill, Experience, Testimonial, ContactMessage,
+)
 
 
 @admin.register(PersonalInfo)
@@ -9,7 +11,8 @@ class PersonalInfoAdmin(admin.ModelAdmin):
         ('Identity', {'fields': ('name', 'title', 'location', 'bio', 'email')}),
         ('Photo', {'fields': ('profile_image', 'avatar')}),
         ('Social Links', {'fields': ('github', 'linkedin', 'twitter')}),
-        ('Skills', {'fields': ('skills',)}),
+        ('Skills (legacy)', {'fields': ('skills',)}),
+        ('Resume', {'fields': ('resume',)}),
     )
 
     def has_add_permission(self, request):
@@ -53,3 +56,40 @@ class CodeSnippetAdmin(admin.ModelAdmin):
         (None, {'fields': ('title', 'language', 'project')}),
         ('Content', {'fields': ('code', 'description')}),
     )
+
+
+@admin.register(Skill)
+class SkillAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'percentage', 'order')
+    list_filter = ('category',)
+    list_editable = ('percentage', 'order')
+    ordering = ('order', '-percentage')
+
+
+@admin.register(Experience)
+class ExperienceAdmin(admin.ModelAdmin):
+    list_display = ('title', 'organization', 'type', 'start_date', 'end_date', 'order')
+    list_filter = ('type',)
+    list_editable = ('order',)
+    ordering = ('-start_date',)
+
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ('name', 'role', 'order', 'created')
+    list_editable = ('order',)
+    search_fields = ('name', 'message')
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'subject', 'created', 'is_read')
+    list_filter = ('is_read',)
+    list_editable = ('is_read',)
+    search_fields = ('name', 'email', 'subject', 'message')
+    readonly_fields = ('name', 'email', 'subject', 'message', 'created')
+
+    def has_add_permission(self, request):
+        # Messages only ever come in through the public contact form —
+        # nobody should be creating fake ones from the admin UI.
+        return False

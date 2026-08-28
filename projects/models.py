@@ -18,7 +18,8 @@ class PersonalInfo(models.Model):
     linkedin = models.URLField(blank=True)
     twitter = models.URLField(blank=True)
     email = models.EmailField(blank=True)
-    skills = models.CharField(max_length=500, blank=True, help_text='Comma separated skills')
+    skills = models.CharField(max_length=500, blank=True, help_text='Comma separated skills (legacy — prefer the Skill model below)')
+    resume = models.FileField(upload_to='resume/', blank=True, null=True, help_text='CV/resume PDF for the download button')
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -39,6 +40,79 @@ class PersonalInfo(models.Model):
         # used in the view.
         self.pk = 1
         super().save(*args, **kwargs)
+
+
+class Skill(models.Model):
+    """A single skill with a proficiency percentage, grouped by category."""
+    CATEGORY_CHOICES = [
+        ('frontend', 'Frontend'),
+        ('backend', 'Backend'),
+        ('tools', 'Tools'),
+        ('mobile', 'Mobile'),
+    ]
+    name = models.CharField(max_length=100)
+    percentage = models.PositiveSmallIntegerField(default=50, help_text='0-100')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='frontend')
+    order = models.PositiveIntegerField(default=0, help_text='Lower numbers show first')
+
+    class Meta:
+        ordering = ['order', '-percentage']
+
+    def __str__(self):
+        return f'{self.name} ({self.percentage}%)'
+
+
+class Experience(models.Model):
+    """A single entry in the education/work timeline."""
+    TYPE_CHOICES = [
+        ('education', 'Education'),
+        ('work', 'Work'),
+    ]
+    title = models.CharField(max_length=200, help_text='Role or degree title')
+    organization = models.CharField(max_length=200)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='work')
+    description = models.TextField(blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True, help_text='Leave blank for "Present"')
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['-start_date']
+
+    def __str__(self):
+        return f'{self.title} @ {self.organization}'
+
+
+class Testimonial(models.Model):
+    """A short testimonial/recommendation shown on the site."""
+    name = models.CharField(max_length=150)
+    role = models.CharField(max_length=200, blank=True, help_text='e.g. "CTO at Acme" — optional')
+    message = models.TextField()
+    avatar = models.URLField(blank=True, help_text='Optional avatar image URL')
+    order = models.PositiveIntegerField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', '-created']
+
+    def __str__(self):
+        return f'{self.name} — {self.message[:40]}'
+
+
+class ContactMessage(models.Model):
+    """A message submitted through the public contact form."""
+    name = models.CharField(max_length=150)
+    email = models.EmailField()
+    subject = models.CharField(max_length=200, blank=True)
+    message = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created']
+
+    def __str__(self):
+        return f'{self.name} <{self.email}> — {self.created:%Y-%m-%d}'
 
 
 class Project(models.Model):
