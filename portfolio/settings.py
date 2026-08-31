@@ -1,29 +1,40 @@
-import pymysql
+"""
+Django settings for the upgraded portfolio backend.
+"""
 import os
-# new 
-
-pymysql.install_as_MySQLdb()
-
-"""
-Django settings for portfolio project.
-"""
-
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Optional MySQL support
+try:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+except ImportError:
+    pass
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-(your-secret-key-here-change-in-production)')
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-change-me-in-production-please-use-env'
+)
 
-# AUTO SWITCH: Debug ON locally, OFF in production
-DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 
-# All allowed hosts
 ALLOWED_HOSTS = [
-    'pirate.alwaysdata.net',
     'localhost',
     '127.0.0.1',
+    'pirate.alwaysdata.net',
+    '.vercel.app',
+    '.alwaysdata.net',
 ]
+
+# Extra hosts from env (comma-separated)
+extra_hosts = os.getenv('DJANGO_ALLOWED_HOSTS', '')
+if extra_hosts:
+    ALLOWED_HOSTS += [h.strip() for h in extra_hosts.split(',') if h.strip()]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -32,15 +43,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Third-party
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'django_filters',
+    # Local
     'projects',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # MUST be first
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -69,7 +84,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'portfolio.wsgi.application'
 
-# AUTO SWITCH DATABASE: SQLite locally / MySQL on alwaysdata
+# Database: SQLite in DEBUG, MySQL in production
 if DEBUG:
     DATABASES = {
         'default': {
@@ -81,14 +96,11 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'pirate_portfolio',
-            'USER': 'pirate',
-            # Rotate this password in the Alwaysdata panel, then set the new
-            # one as an env var there — never commit it to the repo again.
-            # 'PASSWORD': os.getenv('DJANGO_DB_PASSWORD'),
-            'PASSWORD': "mwalish2026",
-            'HOST': 'mysql-pirate.alwaysdata.net',
-            'PORT': '3306',
+            'NAME': os.getenv('DJANGO_DB_NAME', 'pirate_portfolio'),
+            'USER': os.getenv('DJANGO_DB_USER', 'pirate'),
+            'PASSWORD': os.getenv('DJANGO_DB_PASSWORD', ''),
+            'HOST': os.getenv('DJANGO_DB_HOST', 'mysql-pirate.alwaysdata.net'),
+            'PORT': os.getenv('DJANGO_DB_PORT', '3306'),
             'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             },
@@ -103,12 +115,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Nairobi'
 USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -126,54 +139,64 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 12,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
 }
 
-# ============================================================
-# CORS Settings
-# ============================================================
+# CORS
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://pirate.alwaysdata.net",
-    "https://myportfolio-rho-six-12.vercel.app",  # ✅ ADD THIS
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'https://pirate.alwaysdata.net',
+    'https://myportfolio-rho-six-12.vercel.app',
 ]
-CORS_ALLOW_CREDENTIALS = True
 
-# Only allow all origins when running in development
+extra_cors = os.getenv('DJANGO_CORS_ORIGINS', '')
+if extra_cors:
+    CORS_ALLOWED_ORIGINS += [o.strip() for o in extra_cors.split(',') if o.strip()]
+
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 CORS_ALLOW_HEADERS = [
-    "accept",
-    "accept-encoding",
-    "authorization",
-    "content-type",
-    "dnt",
-    "origin",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
-CORS_ALLOW_METHODS = [
-    "DELETE",
-    "GET",
-    "OPTIONS",
-    "PATCH",
-    "POST",
-    "PUT",
-]
+CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 
-# ============================================================
-# CSRF Settings
-# ============================================================
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://pirate.alwaysdata.net",
-    "https://myportfolio-rho-six-12.vercel.app",  # ✅ ALREADY THERE — good
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://pirate.alwaysdata.net',
+    'https://myportfolio-rho-six-12.vercel.app',
 ]
 
-# Security — auto-applied in production only
+# Email (contact form notifications)
+EMAIL_BACKEND = os.getenv(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend'  # prints to console in dev
+)
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'portfolio@example.com')
+CONTACT_NOTIFY_EMAIL = os.getenv('CONTACT_NOTIFY_EMAIL', '')  # where new messages go
+
+# Security (production only)
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -182,3 +205,4 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False') == 'True'

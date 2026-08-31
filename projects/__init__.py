@@ -1,1 +1,1 @@
-# projects app
+# Projects app
